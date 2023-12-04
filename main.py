@@ -9,6 +9,8 @@ class Chain:
     def __str__(self) -> str:
         return str(self.name)
     
+proxy= {'https': 'http://kVqHD7sC:G19CZLra@154.196.68.77:64968','http': 'http://kVqHD7sC:G19CZLra@154.196.68.77:64968'}
+    
 # сети
     
 arbitrum = Chain('Arb','https://arb1.arbitrum.io/rpc')
@@ -17,6 +19,7 @@ erc20 = Chain('eth','https://rpc.ankr.com/eth')
 avax = Chain('Avax','https://avalanche-c-chain.publicnode.com/')
 bep20 = Chain('Bep20','https://bsc-dataseed1.defibit.io/')
 poligon = Chain('poligon','https://polygon-rpc.com',)
+zora = Chain('zora','https://rpc.zora.energy')
 
 # если хотим добавить сеть то пишем :
 # name_set = Chain('name','RPC')
@@ -24,17 +27,21 @@ poligon = Chain('poligon','https://polygon-rpc.com',)
 '''
 Настройки
 '''
-chain = zk # выбираем из списка выше 
+chain = zora # выбираем из списка выше 
 file_wal = 'wal.txt' # file wal
 
 '''
 готово можно запускать
 '''
 
-def chek_tx(adress,chain):
-    w3 = Web3(provider=Web3.HTTPProvider(chain.rpc))
-    nonce = w3.eth.get_transaction_count(adress)
-    return nonce
+def chek_tx(adress,chain:Chain):
+    if chain.name == 'zora':
+        w3 = Web3(provider=Web3.HTTPProvider(chain.rpc,request_kwargs={'proxies': proxy}))
+    else:
+        w3 = Web3(provider=Web3.HTTPProvider(chain.rpc))
+    balanse = w3.eth.get_balance(Web3.to_checksum_address(adress))
+    nonce = w3.eth.get_transaction_count(Web3.to_checksum_address(adress))
+    return nonce,balanse
 
 def wallett(file):
     private = open(file,'r').read().splitlines()
@@ -56,12 +63,12 @@ def main():
         adress_wal = wallett(file_wal)
         print(adress_wal,end=' ')
         try:    
-            nonse = chek_tx(adress_wal,chain)
-            print(nonse)
+            nonse,balanse = chek_tx(adress_wal,chain)
+            print(f'nonse {nonse} balanse eth {balanse/10**18}')
         except Exception as a:
             nonse = 0
             print(a)
-            write_t(t+' проверить')
+            write_t(adress_wal+' проверить')
         t= f'{adress_wal} {nonse}'
         write_t(t)
         wallett_del(file_wal)
