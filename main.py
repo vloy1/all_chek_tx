@@ -1,4 +1,8 @@
-from web3 import Web3
+
+try:
+    from web3 import Web3
+except Exception as a:
+    print(a)
 
 class Chain:
 
@@ -15,11 +19,12 @@ proxy= {'https': 'http://kVqHD7sC:G19CZLra@154.196.68.77:64968','http': 'http://
     
 arbitrum = Chain('Arb','https://arb1.arbitrum.io/rpc')
 zk = Chain('zk','https://mainnet.era.zksync.io')
-erc20 = Chain('eth','https://rpc.ankr.com/eth')
+erc20 = Chain('eth','https://ethereum-mainnet.core.chainstack.com/70ae3a3e68a6c1ed594168c8a642e4b3')
 avax = Chain('Avax','https://avalanche-c-chain.publicnode.com/')
 bep20 = Chain('Bep20','https://bsc-dataseed1.defibit.io/')
 poligon = Chain('poligon','https://polygon-rpc.com',)
 zora = Chain('zora','https://rpc.zora.energy')
+scroll = Chain('scroll','https://rpc.scroll.io')
 
 # если хотим добавить сеть то пишем :
 # name_set = Chain('name','RPC')
@@ -27,7 +32,7 @@ zora = Chain('zora','https://rpc.zora.energy')
 '''
 Настройки
 '''
-chain = zora # выбираем из списка выше 
+chain = scroll # выбираем из списка выше 
 file_wal = 'wal.txt' # file wal
 
 '''
@@ -42,6 +47,12 @@ def chek_tx(adress,chain:Chain):
     balanse = w3.eth.get_balance(Web3.to_checksum_address(adress))
     nonce = w3.eth.get_transaction_count(Web3.to_checksum_address(adress))
     return nonce,balanse
+
+def aka(privat,set:Chain):
+    w3 = Web3(Web3.HTTPProvider(set.rpc))
+    account = w3.eth.account.from_key(privat)
+    adress = account.address
+    return adress
 
 def wallett(file):
     private = open(file,'r').read().splitlines()
@@ -61,6 +72,7 @@ def write_t(text):
 def main():
     while True:
         adress_wal = wallett(file_wal)
+        #adress_wal = aka(wallett(file_wal),zk)
         print(adress_wal,end=' ')
         try:    
             nonse,balanse = chek_tx(adress_wal,chain)
